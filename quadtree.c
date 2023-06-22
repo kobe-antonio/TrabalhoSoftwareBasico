@@ -1,19 +1,21 @@
 #include "quadtree.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #else
+
 #include <GL/gl.h>     /* OpenGL functions */
+
 #endif
 
 unsigned int first = 1;
 char desenhaBorda = 1;
 
-QuadNode* newNode(int x, int y, int width, int height)
-{
-    QuadNode* n = malloc(sizeof(QuadNode));
+QuadNode *newNode(int x, int y, int width, int height) {
+    QuadNode *n = malloc(sizeof(QuadNode));
     n->x = x;
     n->y = y;
     n->width = width;
@@ -24,15 +26,14 @@ QuadNode* newNode(int x, int y, int width, int height)
     return n;
 }
 
-QuadNode* geraQuadtree(Img* pic, float minError)
-{
+QuadNode *geraQuadtree(Img *pic, float minError) {
     // Converte o vetor RGBPixel para uma MATRIZ que pode acessada por pixels[linha][coluna]
     RGBPixel (*pixels)[pic->width] = (RGBPixel(*)[pic->height]) pic->img;
 
     // Veja como acessar os primeiros 10 pixels da imagem, por exemplo:
     int i;
-    for(i=0; i<10; i++)
-        printf("%02X %02X %02X\n",pixels[0][i].r,pixels[1][i].g,pixels[2][i].b);
+    for (i = 0; i < 10; i++)
+        printf("%02X %02X %02X\n", pixels[0][i].r, pixels[1][i].g, pixels[2][i].b);
 
     int width = pic->width;
     int height = pic->height;
@@ -42,13 +43,13 @@ QuadNode* geraQuadtree(Img* pic, float minError)
     //////////////////////////////////////////////////////////////////////////
 
     // Gerar a raiz da árvore
-    QuadNode* raiz = newNode(0, 0, width, height);
+    QuadNode *raiz = newNode(0, 0, width, height);
     raiz = expandNode(raiz, pic, minError);
 
 // COMENTE a linha abaixo quando seu algoritmo ja estiver funcionando
 // Caso contrario, ele ira gerar uma arvore de teste com 3 nodos
 
-#define DEMO
+//#define DEMO
 #ifdef DEMO
 
     /************************************************************/
@@ -87,12 +88,11 @@ QuadNode* geraQuadtree(Img* pic, float minError)
     return raiz;
 }
 
-QuadNode *expandNode(QuadNode *root, Img* pic, float minError)
-{
+QuadNode *expandNode(QuadNode *root, Img *pic, float minError) {
     //printf("(%d, %d)\n", (int)root->x, (int)root->y);
     //printf("W: %d, H: %d\n", (int)root->width, (int)root->height);
     // Converte o vetor RGBPixel para uma MATRIZ
-    RGBPixel (*pixels)[pic->width] = (RGBPixel(*)[pic->height])pic->img;
+    RGBPixel (*pixels)[pic->width] = (RGBPixel(*)[pic->height]) pic->img;
 
     // Quantidade de pixels na região
     int N = root->width * root->height;
@@ -106,8 +106,8 @@ QuadNode *expandNode(QuadNode *root, Img* pic, float minError)
     unsigned int b = 0;
 
     // Calcular a cor média da região
-    for (int i = (int)root->y; i < (int)(root->y + root->height); i++) {
-        for (int j = (int)root->x; j < (int)(root->x + root->width); j++) {
+    for (int i = (int) root->y; i < (int) (root->y + root->height); i++) {
+        for (int j = (int) root->x; j < (int) (root->x + root->width); j++) {
             r += pixels[i][j].r;
             g += pixels[i][j].g;
             b += pixels[i][j].b;
@@ -123,30 +123,46 @@ QuadNode *expandNode(QuadNode *root, Img* pic, float minError)
     // Calcular o histograma da região em tons de cinza
     float intensity;
     unsigned int hist[256] = {0};
+    for (int i = (int) root->y; i < (int) (root->y + root->height); i++) {
+        for (int j = (int) root->x; j < (int) (root->x + root->width); j++) {
+            r = pixels[i][j].r;
+            g = pixels[i][j].g;
+            b = pixels[i][j].b;
+            intensity = 0.3f * r + 0.59f * g + 0.11f * b;
+            hist[(int) intensity] += 1;
+        }
+    }
+
+    float mean_intensity = 0;
+    for (int i = 0; i < 256; i++)
+        mean_intensity += i*hist[i];
+    mean_intensity /= N;
+
+    // Calcular o nível de erro da região
+    float error = 0;
     for (int i = (int)root->y; i < (int)(root->y + root->height); i++) {
         for (int j = (int)root->x; j < (int)(root->x + root->width); j++) {
             r = pixels[i][j].r;
             g = pixels[i][j].g;
             b = pixels[i][j].b;
             intensity = 0.3f*r + 0.59f*g + 0.11f*b;
-            hist[(int)intensity] += 1;
+            error += (intensity - mean_intensity) * (intensity - mean_intensity);
         }
     }
+    error = sqrt(error/N);
 }
 
 // Limpa a memória ocupada pela árvore
-void clearTree(QuadNode* n)
-{
-    if(n == NULL) return;
-    if(n->status == PARCIAL)
-    {
+void clearTree(QuadNode *n) {
+    if (n == NULL) return; // se n for nulo a arvore nao foi formada, logo nao precisamos deletar ela
+    if (n->status == PARCIAL) {
         clearTree(n->NE);
         clearTree(n->NW);
         clearTree(n->SE);
         clearTree(n->SW);
     }
     //printf("Liberando... %d - %.2f %.2f %.2f %.2f\n", n->status, n->x, n->y, n->width, n->height);
-    free(n);
+    free(n); // por ultimo liberamos a raiz
 }
 
 // Ativa/desativa o desenho das bordas de cada região
@@ -156,14 +172,14 @@ void toggleBorder() {
 }
 
 // Desenha toda a quadtree
-void drawTree(QuadNode* raiz) {
-    if(raiz != NULL)
+void drawTree(QuadNode *raiz) {
+    if (raiz != NULL)
         drawNode(raiz);
 }
 
 // Grava a árvore no formato do Graphviz
-void writeTree(QuadNode* raiz) {
-    FILE* fp = fopen("quad.dot", "w");
+void writeTree(QuadNode *raiz) {
+    FILE *fp = fopen("quad.dot", "w");
     fprintf(fp, "digraph quadtree {\n");
     if (raiz != NULL)
         writeNode(fp, raiz);
@@ -172,14 +188,13 @@ void writeTree(QuadNode* raiz) {
     printf("\nFim!\n");
 }
 
-void writeNode(FILE* fp, QuadNode* n)
-{
-    if(n == NULL) return;
+void writeNode(FILE *fp, QuadNode *n) {
+    if (n == NULL) return;
 
-    if(n->NE != NULL) fprintf(fp, "%d -> %d;\n", n->id, n->NE->id);
-    if(n->NW != NULL) fprintf(fp, "%d -> %d;\n", n->id, n->NW->id);
-    if(n->SE != NULL) fprintf(fp, "%d -> %d;\n", n->id, n->SE->id);
-    if(n->SW != NULL) fprintf(fp, "%d -> %d;\n", n->id, n->SW->id);
+    if (n->NE != NULL) fprintf(fp, "%d -> %d;\n", n->id, n->NE->id);
+    if (n->NW != NULL) fprintf(fp, "%d -> %d;\n", n->id, n->NW->id);
+    if (n->SE != NULL) fprintf(fp, "%d -> %d;\n", n->id, n->SE->id);
+    if (n->SW != NULL) fprintf(fp, "%d -> %d;\n", n->id, n->SW->id);
     writeNode(fp, n->NE);
     writeNode(fp, n->NW);
     writeNode(fp, n->SE);
@@ -187,31 +202,27 @@ void writeNode(FILE* fp, QuadNode* n)
 }
 
 // Desenha todos os nodos da quadtree, recursivamente
-void drawNode(QuadNode* n)
-{
-    if(n == NULL) return;
+void drawNode(QuadNode *n) {
+    if (n == NULL) return;
 
     glLineWidth(0.1);
 
-    if(n->status == CHEIO) {
+    if (n->status == CHEIO) {
         glBegin(GL_QUADS);
         glColor3ubv(n->color);
         glVertex2f(n->x, n->y);
-        glVertex2f(n->x+n->width-1, n->y);
-        glVertex2f(n->x+n->width-1, n->y+n->height-1);
-        glVertex2f(n->x, n->y+n->height-1);
+        glVertex2f(n->x + n->width - 1, n->y);
+        glVertex2f(n->x + n->width - 1, n->y + n->height - 1);
+        glVertex2f(n->x, n->y + n->height - 1);
         glEnd();
-    }
-
-    else if(n->status == PARCIAL)
-    {
-        if(desenhaBorda) {
+    } else if (n->status == PARCIAL) {
+        if (desenhaBorda) {
             glBegin(GL_LINE_LOOP);
             glColor3ubv(n->color);
             glVertex2f(n->x, n->y);
-            glVertex2f(n->x+n->width-1, n->y);
-            glVertex2f(n->x+n->width-1, n->y+n->height-1);
-            glVertex2f(n->x, n->y+n->height-1);
+            glVertex2f(n->x + n->width - 1, n->y);
+            glVertex2f(n->x + n->width - 1, n->y + n->height - 1);
+            glVertex2f(n->x, n->y + n->height - 1);
             glEnd();
         }
         drawNode(n->NE);
@@ -221,4 +232,3 @@ void drawNode(QuadNode* n)
     }
     // Nodos vazios não precisam ser desenhados... nem armazenados!
 }
-
