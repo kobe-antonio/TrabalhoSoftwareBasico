@@ -150,6 +150,31 @@ QuadNode *expandNode(QuadNode *root, Img *pic, float minError) {
         }
     }
     error = sqrt(error/N);
+
+    // Verificar se o nível de erro é menor do que o erro mínimo especificado
+    if (error < minError) {
+        root->status = CHEIO;
+    }
+
+        // Subdividir a região em quatro e repetir o algoritmo
+    else {
+        int x = root->x;
+        int y = root->y;
+        int width = (int)root->width;
+        int height = (int)root->height;
+        QuadNode* NW = newNode(x, y, width/2, height/2);
+        QuadNode* NE = newNode(x+width/2, y, width/2, height/2);
+        QuadNode* SW = newNode(x, y+height/2, width/2, height/2);
+        QuadNode* SE = newNode(x+width/2, y+height/2, width/2, height/2);
+        root->NW = expandNode(NW, pic, minError);
+        root->NE = expandNode(NE, pic, minError);
+        root->SW = expandNode(SW, pic, minError);
+        root->SE = expandNode(SE, pic, minError);
+        root->status = PARCIAL;
+    }
+
+    // Devolver o nó da árvore
+    return root;
 }
 
 // Limpa a memória ocupada pela árvore
