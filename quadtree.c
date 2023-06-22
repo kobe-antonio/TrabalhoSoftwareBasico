@@ -41,6 +41,10 @@ QuadNode* geraQuadtree(Img* pic, float minError)
     // Implemente aqui o algoritmo que gera a quadtree, retornando o nodo raiz
     //////////////////////////////////////////////////////////////////////////
 
+    // Gerar a raiz da árvore
+    QuadNode* raiz = newNode(0, 0, width, height);
+    raiz = expandNode(raiz, pic, minError);
+
 // COMENTE a linha abaixo quando seu algoritmo ja estiver funcionando
 // Caso contrario, ele ira gerar uma arvore de teste com 3 nodos
 
@@ -81,6 +85,53 @@ QuadNode* geraQuadtree(Img* pic, float minError)
 #endif
     // Finalmente, retorna a raiz da árvore
     return raiz;
+}
+
+QuadNode *expandNode(QuadNode *root, Img* pic, float minError)
+{
+    //printf("(%d, %d)\n", (int)root->x, (int)root->y);
+    //printf("W: %d, H: %d\n", (int)root->width, (int)root->height);
+    // Converte o vetor RGBPixel para uma MATRIZ
+    RGBPixel (*pixels)[pic->width] = (RGBPixel(*)[pic->height])pic->img;
+
+    // Quantidade de pixels na região
+    int N = root->width * root->height;
+
+    if (N == 0)
+        return root;
+
+    // Variáveis para calcular a cor média
+    unsigned int r = 0;
+    unsigned int g = 0;
+    unsigned int b = 0;
+
+    // Calcular a cor média da região
+    for (int i = (int)root->y; i < (int)(root->y + root->height); i++) {
+        for (int j = (int)root->x; j < (int)(root->x + root->width); j++) {
+            r += pixels[i][j].r;
+            g += pixels[i][j].g;
+            b += pixels[i][j].b;
+        }
+    }
+    r /= N;
+    g /= N;
+    b /= N;
+    root->color[0] = r;
+    root->color[1] = g;
+    root->color[2] = b;
+
+    // Calcular o histograma da região em tons de cinza
+    float intensity;
+    unsigned int hist[256] = {0};
+    for (int i = (int)root->y; i < (int)(root->y + root->height); i++) {
+        for (int j = (int)root->x; j < (int)(root->x + root->width); j++) {
+            r = pixels[i][j].r;
+            g = pixels[i][j].g;
+            b = pixels[i][j].b;
+            intensity = 0.3f*r + 0.59f*g + 0.11f*b;
+            hist[(int)intensity] += 1;
+        }
+    }
 }
 
 // Limpa a memória ocupada pela árvore
