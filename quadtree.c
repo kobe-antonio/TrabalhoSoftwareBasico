@@ -172,9 +172,6 @@ QuadNode *expandNode(QuadNode *root, Img *pic, float minError) {
         root->SE = expandNode(SE, pic, minError);
         root->status = PARCIAL;
     }
-
-    // Devolver o nó da árvore
-    return root;
 }
 
 // Limpa a memória ocupada pela árvore
