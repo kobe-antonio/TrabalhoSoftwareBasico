@@ -1,4 +1,4 @@
-/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/ninja -G Ninja -S /Users/antoniovidal/CLionProjects/TrabalhoSoftwareBasico -B /Users/antoniovidal/CLionProjects/TrabalhoSoftwareBasico/cmake-build-debug
+/home/maxwb/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/231.9011.31/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/maxwb/CLionProjects/TrabalhoSoftwareBasico -B /home/maxwb/CLionProjects/TrabalhoSoftwareBasico/cmake-build-debug
 CMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
   Compatibility with CMake < 2.8.12 will be removed from a future version of
   CMake.
@@ -7,20 +7,40 @@ CMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
   CMake that the project does not need compatibility with older versions.
 
 
--- The C compiler identification is AppleClang 14.0.3.14030022
--- The CXX compiler identification is AppleClang 14.0.3.14030022
+-- The C compiler identification is GNU 11.3.0
+-- The CXX compiler identification is GNU 11.3.0
 -- Detecting C compiler ABI info
 -- Detecting C compiler ABI info - done
--- Check for working C compiler: /Library/Developer/CommandLineTools/usr/bin/cc - skipped
+-- Check for working C compiler: /usr/bin/cc - skipped
 -- Detecting C compile features
 -- Detecting C compile features - done
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /Library/Developer/CommandLineTools/usr/bin/c++ - skipped
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
--- Found OpenGL: /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk/System/Library/Frameworks/OpenGL.framework   
--- Found GLUT: /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk/System/Library/Frameworks/GLUT.framework  
+CMake Warning (dev) at /home/maxwb/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/231.9011.31/bin/cmake/linux/x64/share/cmake-3.25/Modules/FindOpenGL.cmake:315 (message):
+  Policy CMP0072 is not set: FindOpenGL prefers GLVND by default when
+  available.  Run "cmake --help-policy CMP0072" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
+
+  FindOpenGL found both a legacy GL library:
+
+    OPENGL_gl_LIBRARY: /usr/lib/x86_64-linux-gnu/libGL.so
+
+  and GLVND libraries for OpenGL and GLX:
+
+    OPENGL_opengl_LIBRARY: /usr/lib/x86_64-linux-gnu/libOpenGL.so
+    OPENGL_glx_LIBRARY: /usr/lib/x86_64-linux-gnu/libGLX.so
+
+  OpenGL_GL_PREFERENCE has not been set to "GLVND" or "LEGACY", so for
+  compatibility with CMake 3.10 and below the legacy GL library will be used.
+Call Stack (most recent call first):
+  CMakeLists.txt:12 (find_package)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Found OpenGL: /usr/lib/x86_64-linux-gnu/libOpenGL.so   
+-- Found GLUT: /usr/lib/x86_64-linux-gnu/libglut.so  
 -- Configuring done
 -- Generating done
--- Build files have been written to: /Users/antoniovidal/CLionProjects/TrabalhoSoftwareBasico/cmake-build-debug
+-- Build files have been written to: /home/maxwb/CLionProjects/TrabalhoSoftwareBasico/cmake-build-debug
